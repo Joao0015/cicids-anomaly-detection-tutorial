@@ -1,27 +1,28 @@
-# Usar uma versão leve do Python
+# Utilize a lightweight Python base image
 FROM python:3.11-slim
 
-# Definir o diretório de trabalho dentro do container
+# Define the working directory within the container
 WORKDIR /app
 
-# Instalar dependências do sistema necessárias para bibliotecas de ML (opcional)
-# O scikit-learn e pandas geralmente precisam dessas bibliotecas compartilhadas
+# Install system dependencies required for machine learning libraries (optional)
+# Scikit-learn and pandas typically require these shared libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar apenas o arquivo de requisitos primeiro (melhora o cache do Docker)
+# Copy the requirements file first to optimize Docker layer caching
 COPY requirements.txt .
 
-# Instalar as bibliotecas Python sem salvar o cache do pip (economiza espaço)
+# Install Python libraries without retaining the pip cache to minimize image size
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar o resto dos arquivos para dentro da imagem
+# Transfer the remaining project files into the image
 COPY . .
 
-# 1. Informa ao Docker que a porta 8888 será usada 
+# 1. Inform Docker that the container will listen on port 8888
 EXPOSE 8888
-# 2. Comando para iniciar o Jupyter e manter o container "vivo" 
-# O --ip=0.0.0.0 permite conexões externas (do seu Windows para o container) 
-# O token='' remove a necessidade de senha para facilitar o seu tutorial
- CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+
+# 2. Command to initialize the Jupyter server and ensure container persistence
+# The --ip=0.0.0.0 flag enables external connections
+# An empty token is specified to bypass authentication for tutorial accessibility
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
